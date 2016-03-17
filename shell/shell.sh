@@ -1,12 +1,5 @@
     shell实例手册
 
-0 说明{
-
-    手册制作: 心笑雨
-    更新日期: 2016-03-17
-
-}
-
 1 文件{
 
     split -C 10M            # 将文件切割大小为10M -C按行
@@ -21,7 +14,6 @@
     iconv -f gbk -t utf8 原.txt > 新.txt    # 转换编码
     xxd /boot/grub/stage1                   # 16进制查看
     hexdump -C /boot/grub/stage1            # 16进制查看
-    rename 原模式 目标模式 文件             # 重命名 可正则
     watch -d -n 1 'df; ls -FlAt /path'      # 实时某个目录下查看最新改动过的文件
     cp -v  /dev/dvd  /rhel4.6.iso9660       # 制作镜像
     diff suzu.c suzu2.c  > sz.patch         # 制作补丁
@@ -84,30 +76,13 @@
 
     vim编辑器{
 
-        gconf-editor           # 配置编辑器
-        /etc/vimrc             # 配置文件路径
-        vim +24 file           # 打开文件定位到指定行
-        Ctrl+ U                # 向前翻页
-        Ctrl+ D                # 向后翻页
-        Ctrl+ww                # 在窗口间切换
-        Ctrl+w +or-or=         # 增减高度
-        :sp filename           # 上下分割打开新文件
-        :vs filename           # 左右分割打开新文件
         :nohl                  # 取消高亮
         :set paste             # 取消缩进
         :set autoindent        # 设置自动缩进
-        :set ff                # 查看文本格式
-        :set binary            # 改为unix格式
         :%s/字符1/字符2/g      # 全部替换
-        :200                   # 跳转到200  1 文件头
         dd                     # 删除当前行 并复制 可直接p粘贴
         u                      # 撤销上次操作
-        *                      # 全文匹配当前光标所在字符串
         $                      # 行尾
-        v =                    # 自动格式化代码
-        Ctrl+v                 # 可视模式
-        Ctrl+v I ESC           # 多行操作
-        Ctrl+v s ESC           # 批量取消注释
 
     }
 
@@ -120,8 +95,7 @@
         tar -rvf 1.tar 文件名        # 给tar追加文件
         tar --exclude=/home/dmtsai --exclude=*.tar -zcvf myfile.tar.gz /home/* /etc      # 打包/home, /etc ，但排除 /home/dmtsai
         tar -N "2005/06/01" -zcvf home.tar.gz /home      # 在 /home 当中，比 2005/06/01 新的文件才备份
-        tar -zcvfh home.tar.gz /home                     # 打包目录中包括连接目录
-        tar zcf - ./ | ssh root@IP "tar zxf - -C /xxxx"  # 一边压缩一边解压
+        tar -zcvfh home.tar.gz /home                     # 打包目录中包括连接目
         zgrep 字符 1.gz              # 查看压缩包中文件字符行
         bzip2  -dv 1.tar.bz2         # 解压bzip2
         bzip2 -v 1.tar               # bzip2压缩
@@ -137,13 +111,6 @@
         unrar x rar.rar              # 解压rar包
         7z a 7z.7z *                 # 7z压缩
         7z e 7z.7z                   # 7z解压
-
-    }
-    
-    文件ACL权限控制{
-
-        getfacl 1.test                      # 查看文件ACL权限
-        setfacl -R -m u:xuesong:rw- 1.test  # 对文件增加用户的读写权限 -R 递归
 
     }
     
@@ -309,7 +276,6 @@
     mkpasswd                    # 随机生成密码   -l位数 -C大小 -c小写 -d数字 -s特殊字符
     tzselect                    # 选择时区 #+8=(5 9 1 1) # (TZ='Asia/Shanghai'; export TZ)括号内写入 /etc/profile
     /sbin/hwclock -w            # 时间保存到硬件
-    /etc/shadow                 # 账户影子文件
     LANG=en                     # 修改语言
     vim /etc/sysconfig/i18n     # 修改编码  LANG="en_US.UTF-8"
     export LC_ALL=C             # 强制字符集
@@ -825,164 +791,6 @@
 
     }
 
-    iptables{
-
-        内建三个表：nat mangle 和 filter
-        filter预设规则表，有INPUT、FORWARD 和 OUTPUT 三个规则链
-        vi /etc/sysconfig/iptables    # 配置文件
-        INPUT    # 进入
-        FORWARD  # 转发
-        OUTPUT   # 出去
-        ACCEPT   # 将封包放行
-        REJECT   # 拦阻该封包
-        DROP     # 丢弃封包不予处理
-        -A       # 在所选择的链(INPUT等)末添加一条或更多规则
-        -D       # 删除一条
-        -E       # 修改
-        -p       # tcp、udp、icmp    0相当于所有all    !取反
-        -P       # 设置缺省策略(与所有链都不匹配强制使用此策略)
-        -s       # IP/掩码    (IP/24)    主机名、网络名和清楚的IP地址 !取反
-        -j       # 目标跳转，立即决定包的命运的专用内建目标
-        -i       # 进入的（网络）接口 [名称] eth0
-        -o       # 输出接口[名称] 
-        -m       # 模块
-        --sport  # 源端口
-        --dport  # 目标端口
-        
-        iptables -F                        # 将防火墙中的规则条目清除掉  # 注意: iptables -P INPUT ACCEPT
-        iptables-restore < 规则文件        # 导入防火墙规则
-        /etc/init.d/iptables save          # 保存防火墙设置
-        /etc/init.d/iptables restart       # 重启防火墙服务
-        iptables -L -n                     # 查看规则
-        iptables -t nat -nL                # 查看转发
-
-        iptables实例{
-            
-            iptables -L INPUT                   # 列出某规则链中的所有规则
-            iptables -X allowed                 # 删除某个规则链 ,不加规则链，清除所有非内建的
-            iptables -Z INPUT                   # 将封包计数器归零
-            iptables -N allowed                 # 定义新的规则链
-            iptables -P INPUT DROP              # 定义过滤政策
-            iptables -A INPUT -s 192.168.1.1    # 比对封包的来源IP   # ! 192.168.0.0/24  ! 反向对比
-            iptables -A INPUT -d 192.168.1.1    # 比对封包的目的地IP
-            iptables -A INPUT -i eth0           # 比对封包是从哪片网卡进入
-            iptables -A FORWARD -o eth0         # 比对封包要从哪片网卡送出 eth+表示所有的网卡
-            iptables -A INPUT -p tcp            # -p ! tcp 排除tcp以外的udp、icmp。-p all所有类型
-            iptables -D INPUT 8                 # 从某个规则链中删除一条规则
-            iptables -D INPUT --dport 80 -j DROP         # 从某个规则链中删除一条规则
-            iptables -R INPUT 8 -s 192.168.0.1 -j DROP   # 取代现行规则
-            iptables -I INPUT 8 --dport 80 -j ACCEPT     # 插入一条规则
-            iptables -A INPUT -i eth0 -j DROP            # 其它情况不允许
-            iptables -A INPUT -p tcp -s IP -j DROP       # 禁止指定IP访问
-            iptables -A INPUT -p tcp -s IP --dport port -j DROP               # 禁止指定IP访问端口
-            iptables -A INPUT -s IP -p tcp --dport port -j ACCEPT             # 允许在IP访问指定端口
-            iptables -A INPUT -p tcp --dport 22 -j DROP                       # 禁止使用某端口
-            iptables -A INPUT -i eth0 -p icmp -m icmp --icmp-type 8 -j DROP   # 禁止icmp端口
-            iptables -A INPUT -i eth0 -p icmp -j DROP                         # 禁止icmp端口
-            iptables -t filter -A INPUT -i eth0 -p tcp --syn -j DROP                  # 阻止所有没有经过你系统授权的TCP连接
-            iptables -A INPUT -f -m limit --limit 100/s --limit-burst 100 -j ACCEPT   # IP包流量限制
-            iptables -A INPUT -i eth0 -s 192.168.62.1/32 -p icmp -m icmp --icmp-type 8 -j ACCEPT  # 除192.168.62.1外，禁止其它人ping我的主机
-            iptables -A INPUT -p tcp -m tcp --dport 80 -m state --state NEW -m recent --update --seconds 5 --hitcount 20 --rttl --name WEB --rsource -j DROP  # 可防御cc攻击(未测试)
-
-        }
-
-        iptables配置实例文件{
-
-            # Generated by iptables-save v1.2.11 on Fri Feb  9 12:10:37 2007
-            *filter
-            :INPUT ACCEPT [637:58967]
-            :FORWARD DROP [0:0]
-            :OUTPUT ACCEPT [5091:1301533]
-            # 允许的IP或IP段访问 建议多个
-            -A INPUT -s 127.0.0.1 -p tcp -j ACCEPT
-            -A INPUT -s 192.168.0.0/255.255.0.0 -p tcp -j ACCEPT
-            # 开放对外开放端口
-            -A INPUT -p tcp --dport 80 -j ACCEPT
-            # 指定某端口针对IP开放
-            -A INPUT -s 192.168.10.37 -p tcp --dport 22 -j ACCEPT
-            # 拒绝所有协议(INPUT允许)
-            -A INPUT -p tcp -m tcp --tcp-flags FIN,SYN,RST,PSH,URG RST -j DROP
-            # 允许已建立的或相关连的通行
-            -A INPUT -m state --state ESTABLISHED,RELATED -j ACCEPT
-            # 拒绝ping
-            -A INPUT -p tcp -m tcp -j REJECT --reject-with icmp-port-unreachable
-            COMMIT
-            # Completed on Fri Feb  9 12:10:37 2007
-
-        }
-
-        iptables配置实例{
-
-            # 允许某段IP访问任何端口
-            iptables -A INPUT -s 192.168.0.3/24 -p tcp -j ACCEPT
-            # 设定预设规则 (拒绝所有的数据包，再允许需要的,如只做WEB服务器.还是推荐三个链都是DROP)
-            iptables -P INPUT DROP
-            iptables -P FORWARD DROP
-            iptables -P OUTPUT ACCEPT
-            # 注意: 直接设置这三条会掉线
-            # 开启22端口
-            iptables -A INPUT -p tcp --dport 22 -j ACCEPT
-            # 如果OUTPUT 设置成DROP的，要写上下面一条
-            iptables -A OUTPUT -p tcp --sport 22 -j ACCEPT 
-            # 注:不写导致无法SSH.其他的端口一样,OUTPUT设置成DROP的话,也要添加一条链
-            # 如果开启了web服务器,OUTPUT设置成DROP的话,同样也要添加一条链
-            iptables -A OUTPUT -p tcp --sport 80 -j ACCEPT
-            # 做WEB服务器,开启80端口 ,其他同理
-            iptables -A INPUT -p tcp --dport 80 -j ACCEPT
-            # 做邮件服务器,开启25,110端口
-            iptables -A INPUT -p tcp --dport 110 -j ACCEPT
-            iptables -A INPUT -p tcp --dport 25 -j ACCEPT
-            # 允许icmp包通过,允许ping
-            iptables -A OUTPUT -p icmp -j ACCEPT (OUTPUT设置成DROP的话) 
-            iptables -A INPUT -p icmp -j ACCEPT  (INPUT设置成DROP的话)
-            # 允许loopback!(不然会导致DNS无法正常关闭等问题) 
-            IPTABLES -A INPUT -i lo -p all -j ACCEPT (如果是INPUT DROP)
-            IPTABLES -A OUTPUT -o lo -p all -j ACCEPT(如果是OUTPUT DROP)
-
-        }
-
-        centos6的iptables基本配置{
-            *filter
-            :INPUT ACCEPT [0:0]
-            :FORWARD ACCEPT [0:0]
-            :OUTPUT ACCEPT [0:0]
-            -A INPUT -m state --state ESTABLISHED,RELATED -j ACCEPT
-            -A INPUT -p icmp -j ACCEPT
-            -A INPUT -i lo -j ACCEPT
-            -A INPUT -s 222.186.135.61 -p tcp -j ACCEPT
-            -A INPUT -p tcp  --dport 80 -j ACCEPT
-            -A INPUT -m state --state NEW -m tcp -p tcp --dport 22 -j ACCEPT
-            -A INPUT -j REJECT --reject-with icmp-host-prohibited
-            -A INPUT -p tcp -m tcp --tcp-flags FIN,SYN,RST,PSH,URG RST -j DROP
-            -A FORWARD -j REJECT --reject-with icmp-host-prohibited
-            COMMIT
-        }
-
-        添加网段转发{
-
-            # 例如通过vpn上网
-            echo 1 > /proc/sys/net/ipv4/ip_forward       # 在内核里打开ip转发功能
-            iptables -t nat -A POSTROUTING -s 10.8.0.0/24 -j MASQUERADE  # 添加网段转发
-            iptables -t nat -A POSTROUTING -s 10.0.0.0/255.0.0.0 -o eth0 -j SNAT --to 192.168.10.158  # 原IP网段经过哪个网卡IP出去
-            iptables -t nat -nL                # 查看转发
-
-        }
-
-        端口映射{
-            
-            # 内网通过有外网IP的机器映射端口
-            # 内网主机添加路由
-            route add -net 10.10.20.0 netmask 255.255.255.0 gw 10.10.20.111     # 内网需要添加默认网关，并且网关开启转发
-            # 网关主机
-            echo 1 > /proc/sys/net/ipv4/ip_forward       # 在内核里打开ip转发功能
-            iptables -t nat -A PREROUTING -d 外网IP  -p tcp --dport 9999 -j DNAT --to 10.10.20.55:22    # 进入
-            iptables -t nat -A POSTROUTING -s 10.10.20.0/24 -j SNAT --to 外网IP                         # 转发回去
-            iptables -t nat -nL                # 查看转发
-
-        }
-
-    }
-
 }
 
 4 服务{
@@ -998,334 +806,7 @@
     "`echo "内容"|iconv -f utf8 -t gbk`" | /bin/mail -s "`echo "标题"|iconv -f utf8 -t gbk`" 收件箱     # 解决邮件乱码
     /usr/local/nagios/bin/nagios -v /usr/local/nagios/etc/nagios.cfg   # 检测nagios配置文件
 
-
-    nginx{
-
-        yum install -y make gcc  openssl-devel pcre-devel  bzip2-devel libxml2 libxml2-devel curl-devel libmcrypt-devel libjpeg libjpeg-devel libpng libpng-devel openssl
-
-        groupadd nginx
-        useradd nginx -g nginx -M -s /sbin/nologin
-        
-        mkdir -p /opt/nginx-tmp
-
-        wget http://labs.frickle.com/files/ngx_cache_purge-1.6.tar.gz
-        tar fxz ngx_cache_purge-1.6.tar.gz
-        # ngx_cache_purge 清除指定url缓存
-        # 假设一个URL为 http://192.168.12.133/test.txt 
-        # 通过访问      http://192.168.12.133/purge/test.txt  就可以清除该URL的缓存。
-        
-        tar zxvpf nginx-1.4.4.tar.gz
-        cd nginx-1.4.4
-
-        # ./configure --help
-        # --with                 # 默认不加载 需指定编译此参数才使用
-        # --without              # 默认加载，可用此参数禁用
-        # --add-module=path      # 添加模块的路径
-        # --add-module=/opt/ngx_module_upstream_check \         # nginx 代理状态页面  
-        # ngx_module_upstream_check  编译前需要打对应版本补丁 patch -p1 < /opt/nginx_upstream_check_module/check_1.2.6+.patch
-        # --add-module=/opt/ngx_module_memc \                   # 将请求页面数据存放在 memcached中
-        # --add-module=/opt/ngx_module_lua \                    # 支持lua脚本 yum install lua-devel lua
-
-        ./configure \
-        --user=nginx \
-        --group=nginx \
-        --prefix=/usr/local/nginx \
-        --with-http_ssl_module \
-        --with-http_realip_module \
-        --with-http_gzip_static_module \
-        --with-http_stub_status_module \
-        --add-module=/opt/ngx_cache_purge-1.6 \
-        --http-client-body-temp-path=/opt/nginx-tmp/client \
-        --http-proxy-temp-path=/opt/nginx-tmp/proxy \
-        --http-fastcgi-temp-path=/opt/nginx-tmp/fastcgi \
-        --http-uwsgi-temp-path=/opt/nginx-tmp/uwsgi \
-        --http-scgi-temp-path=/opt/nginx-tmp/scgi
-
-        make && make install
-
-        /usr/local/nginx/sbin/nginx –t             # 检查Nginx配置文件 但并不执行
-        /usr/local/nginx/sbin/nginx -t -c /opt/nginx/conf/nginx.conf  # 检查Nginx配置文件
-        /usr/local/nginx/sbin/nginx                # 启动nginx
-        /usr/local/nginx/sbin/nginx -s reload      # 重载配置
-        /usr/local/nginx/sbin/nginx -s stop        # 关闭nginx服务
-
-    }
-
-    httpd{
-
-        编译参数{
-
-            # so模块用来提供DSO支持的apache核心模块
-            # 如果编译中包含任何DSO模块，则mod_so会被自动包含进核心。
-            # 如果希望核心能够装载DSO，但不实际编译任何DSO模块，则需明确指定"--enable-so=static"
-
-            ./configure --prefix=/usr/local/apache --enable-so --enable-mods-shared=most --enable-rewrite --enable-forward  # 实例编译
-
-            --with-mpm=worker         # 已worker方式运行
-            --with-apxs=/usr/local/apache/bin/apxs  # 制作apache的动态模块DSO rpm包 httpd-devel  #编译模块 apxs -i -a -c mod_foo.c
-            --enable-so               # 让Apache可以支持DSO模式
-            --enable-mods-shared=most # 告诉编译器将所有标准模块都动态编译为DSO模块
-            --enable-rewrite          # 支持地址重写功能
-            --enable-module=most      # 用most可以将一些不常用的，不在缺省常用模块中的模块编译进来
-            --enable-mods-shared=all  # 意思是动态加载所有模块，如果去掉-shared话，是静态加载所有模块
-            --enable-expires          # 可以添加文件过期的限制，有效减轻服务器压力，缓存在用户端，有效期内不会再次访问服务器，除非按f5刷新，但也导致文件更新不及时
-            --enable-deflate          # 压缩功能，网页可以达到40%的压缩，节省带宽成本，但会对cpu压力有一点提高
-            --enable-headers          # 文件头信息改写，压缩功能需要
-            --disable-MODULE          # 禁用MODULE模块(仅用于基本模块)
-            --enable-MODULE=shared    # 将MODULE编译为DSO(可用于所有模块) 
-            --enable-mods-shared=MODULE-LIST   # 将MODULE-LIST中的所有模块都编译成DSO(可用于所有模块) 
-            --enable-modules=MODULE-LIST       # 将MODULE-LIST静态连接进核心(可用于所有模块)
-            
-            # 上述 MODULE-LIST 可以是:
-            1、用引号界定并且用空格分隔的模块名列表  --enable-mods-shared='headers rewrite dav'
-            2、"most"(大多数模块)  --enable-mods-shared=most 
-            3、"all"(所有模块)
-
-        }
-
-        转发{
-
-            #针对非80端口的请求处理
-            RewriteCond %{SERVER_PORT} !^80$
-            RewriteRule ^/(.*)         http://fully.qualified.domain.name:%{SERVER_PORT}/$1 [L,R]
-
-            RewriteCond %{HTTP_HOST} ^ss.aa.com [NC]
-            RewriteRule  ^(.*)  http://www.aa.com/so/$1/0/p0?  [L,R=301]
-            #RewriteRule 只对?前处理，所以会把?后的都保留下来
-            #在转发后地址后加?即可取消RewriteRule保留的字符
-            #R的含义是redirect，即重定向，该请求不会再被apache交给后端处理，而是直接返回给浏览器进行重定向跳转。301是返回的http状态码，具体可以参考http rfc文档，跳转都是3XX。
-            #L是last，即最后一个rewrite规则，如果请求被此规则命中，将不会继续再向下匹配其他规则。    
-
-        }
-
-    }
-
-    mysql源码安装{
     
-        groupadd mysql
-        useradd mysql -g mysql -M -s /bin/false
-        tar zxvf mysql-5.0.22.tar.gz
-        cd mysql-5.0.22
-        ./configure  --prefix=/usr/local/mysql \
-        --with-client-ldflags=-all-static \
-        --with-mysqld-ldflags=-all-static \
-        --with-mysqld-user=mysql \
-        --with-extra-charsets=all \
-        --with-unix-socket-path=/var/tmp/mysql.sock
-        make  &&   make  install
-        # 生成mysql用户数据库和表文件，在安装包中输入
-        scripts/mysql_install_db  --user=mysql
-        vi ~/.bashrc
-        export PATH="$PATH: /usr/local/mysql/bin"
-        # 配置文件,有large,medium,small三个，根据机器性能选择
-        cp support-files/my-medium.cnf /etc/my.cnf
-        cp support-files/mysql.server /etc/init.d/mysqld
-        chmod 700 /etc/init.d/mysqld
-        cd /usr/local
-        chmod 750 mysql -R
-        chgrp mysql mysql -R
-        chown mysql mysql/var -R
-        cp  /usr/local/mysql/libexec/mysqld mysqld.old
-        ln -s /usr/local/mysql/bin/mysql /sbin/mysql
-        ln -s /usr/local/mysql/bin/mysqladmin /sbin/mysqladmin
-        ln -s -f /usr/local/mysql/bin/mysqld_safe /etc/rc.d/rc3.d/S15mysql5
-        ln -s -f /usr/local/mysql/bin/mysqld_safe /etc/rc.d/rc0.d/K15mysql5
-        
-    }
-
-    mysql常用命令{
-        
-        ./mysql/bin/mysqld_safe --user=mysql &   # 启动mysql服务
-        ./mysql/bin/mysqladmin -uroot -p -S ./mysql/data/mysql.sock shutdown    # 停止mysql服务
-        mysqlcheck -uroot -p -S mysql.sock --optimize --databases account       # 检查、修复、优化MyISAM表
-        mysqlbinlog slave-relay-bin.000001              # 查看二进制日志(报错加绝对路径)
-        mysqladmin -h myhost -u root -p create dbname   # 创建数据库
-
-        flush privileges;             # 刷新
-        show databases;               # 显示所有数据库
-        use dbname;                   # 打开数据库
-        show tables;                  # 显示选中数据库中所有的表
-        desc tables;                  # 查看表结构
-        drop database name;           # 删除数据库
-        drop table name;              # 删除表
-        create database name;         # 创建数据库
-        select 列名称 from 表名称;    # 查询
-        show grants for repl;         # 查看用户权限
-        show processlist;             # 查看mysql进程
-        show full processlist;        # 显示进程全的语句
-        select user();                # 查看所有用户
-        show slave status\G;          # 查看主从状态
-        show variables;               # 查看所有参数变量
-        show status;                  # 运行状态
-        show table status             # 查看表的引擎状态
-        drop table if exists user                       # 表存在就删除
-        create table if not exists user                 # 表不存在就创建
-        select host,user,password from user;            # 查询用户权限 先use mysql
-        create table ka(ka_id varchar(6),qianshu int);  # 创建表
-        show variables like 'character_set_%';          # 查看系统的字符集和排序方式的设定
-        show variables like '%timeout%';                # 查看超时(wait_timeout)
-        delete from user where user='';                 # 删除空用户
-        delete from user where user='sss' and host='localhost' ;    # 删除用户
-        drop user 'sss'@'localhost';                                # 使用此方法删除用户更为靠谱
-        ALTER TABLE mytable ENGINE = MyISAM ;                       # 改变现有的表使用的存储引擎
-        SHOW TABLE STATUS from  库名  where Name='表名';            # 查询表引擎
-        mysql -uroot -p -A -ss -h10.10.10.5 -e "show databases;"    # shell中获取数据不带表格 -ss参数
-        CREATE TABLE innodb (id int, title char(20)) ENGINE = INNODB                     # 创建表指定存储引擎的类型(MyISAM或INNODB)
-        grant replication slave on *.* to '用户'@'%' identified by '密码';               # 创建主从复制用户
-        ALTER TABLE player ADD INDEX weekcredit_faction_index (weekcredit, faction);     # 添加索引
-        alter table name add column accountid(列名)  int(11) NOT NULL(字段不为空);       # 插入字段
-        update host set monitor_state='Y',hostname='xuesong' where ip='192.168.1.1';     # 更新数据
-        
-        自增表{
-        
-            create table oldBoy  (id INTEGER  PRIMARY KEY AUTO_INCREMENT, name CHAR(30) NOT NULL, age integer , sex CHAR(15) );  # 创建自增表
-            insert into oldBoy(name,age,sex) values(%s,%s,%s)  # 自增插入数据
-            
-        }
-
-        登录mysql的命令{
-
-            # 格式： mysql -h 主机地址 -u 用户名 -p 用户密码
-            mysql -h110.110.110.110 -P3306 -uroot -p
-            mysql -uroot -p -S /data1/mysql5/data/mysql.sock -A  --default-character-set=GBK
-
-        }
-
-        shell执行mysql命令{
-            
-            mysql -u root -p'123' xuesong < file.sql   # 针对指定库执行sql文件中的语句,好处不需要转义特殊符号,一条语句可以换行.不指定库执行时语句中需要先use
-            mysql -u$username -p$passwd -h$dbhost -P$dbport -A -e "      
-            use $dbname;
-            delete from data where date=('$date1');
-            "    # 执行多条mysql命令
-            mysql -uroot -p -S mysql.sock -e "use db;alter table gift add column accountid  int(11) NOT NULL;flush privileges;"    # 不登陆mysql插入字段
-            
-        }
-
-        备份数据库{
-
-            mysqldump -h host -u root -p --default-character-set=utf8 dbname >dbname_backup.sql               # 不包括库名，还原需先创建库，在use 
-            mysqldump -h host -u root -p --database --default-character-set=utf8 dbname >dbname_backup.sql    # 包括库名，还原不需要创建库
-            /bin/mysqlhotcopy -u root -p    # mysqlhotcopy只能备份MyISAM引擎
-            mysqldump -u root -p -S mysql.sock --default-character-set=utf8 dbname table1 table2  > /data/db.sql    # 备份表
-            mysqldump -uroot -p123  -d database > database.sql    # 备份数据库结构
-            
-            innobackupex --user=root --password="" --defaults-file=/data/mysql5/data/my_3306.cnf --socket=/data/mysql5/data/mysql.sock --slave-info --stream=tar --tmpdir=/data/dbbackup/temp /data/dbbackup/ 2>/data/dbbackup/dbbackup.log | gzip 1>/data/dbbackup/db50.tar.gz   # xtrabackup备份需单独安装软件 优点: 速度快,压力小,可直接恢复主从复制
-
-        }
-
-        还原数据库{
-
-            mysql -h host -u root -p dbname < dbname_backup.sql   
-            source 路径.sql   # 登陆mysql后还原sql文件
-
-        }
-
-        赋权限{
-
-            # 指定IP: $IP  本机: localhost   所有IP地址: %   # 通常指定多条
-            grant all on zabbix.* to user@"$IP";             # 对现有账号赋予权限
-            grant select on database.* to user@"%" Identified by "passwd";     # 赋予查询权限(没有用户，直接创建)
-            grant all privileges on database.* to user@"$IP" identified by 'passwd';         # 赋予指定IP指定用户所有权限(不允许对当前库给其他用户赋权限)
-            grant all privileges on database.* to user@"localhost" identified by 'passwd' with grant option;   # 赋予本机指定用户所有权限(允许对当前库给其他用户赋权限)
-            grant select, insert, update, delete on database.* to user@'ip'identified by "passwd";   # 开放管理操作指令
-            revoke all on *.* from user@localhost;     # 回收权限
-
-        }
-
-        更改密码{
-
-            update user set password=password('passwd') where user='root'
-            mysqladmin -u root password 'xuesong'
-
-        }
-
-        mysql忘记密码后重置{
-
-            cd /data/mysql5
-            /data/mysql5/bin/mysqld_safe --user=mysql --skip-grant-tables --skip-networking &
-            use mysql;
-            update user set password=password('123123') where user='root';
-
-        }
-
-        mysql主从复制失败恢复{
-
-            slave stop;
-            reset slave;
-            change master to master_host='10.10.10.110',master_port=3306,master_user='repl',master_password='repl',master_log_file='master-bin.000010',master_log_pos=107,master_connect_retry=60;
-            slave start;
-
-        }
-
-        sql语句使用变量{
-
-            use xuesong;
-            set @a=concat('my',weekday(curdate()));    # 组合时间变量
-            set @sql := concat('CREATE TABLE IF NOT EXISTS ',@a,'( id INT(11) NOT NULL )');   # 组合sql语句
-            select @sql;                    # 查看语句
-            prepare create_tb from @sql;    # 准备
-            execute create_tb;              # 执行
-
-        }
-
-        检测mysql主从复制延迟{
-            
-            1、在从库定时执行更新主库中的一个timeout数值
-            2、同时取出从库中的timeout值对比判断从库与主库的延迟
-        
-        }
-
-        mysql慢查询{
-        
-            select * from information_schema.processlist where command in ('Query') and time >5\G      # 查询操作大于5S的进程
-
-            开启慢查询日志{
-                
-                # 配置文件 /etc/my.conf
-                [mysqld]
-                log-slow-queries=/var/lib/mysql/slowquery.log         # 指定日志文件存放位置，可以为空，系统会给一个缺省的文件host_name-slow.log
-                long_query_time=5                                     # 记录超过的时间，默认为10s
-                log-queries-not-using-indexes                         # log下来没有使用索引的query,可以根据情况决定是否开启  可不加
-                log-long-format                                       # 如果设置了，所有没有使用索引的查询也将被记录    可不加
-                # 直接修改生效
-                show variables like "%slow%";                         # 查看慢查询状态 
-                set global slow_query_log='ON';                       # 开启慢查询日志 变量可能不同，看上句查询出来的变量
-
-            }
-            
-            mysqldumpslow慢查询日志查看{
-
-                -s  # 是order的顺序，包括看了代码，主要有 c,t,l,r和ac,at,al,ar，分别是按照query次数，时间，lock的时间和返回的记录数来排序，前面加了a的时倒序 
-                -t  # 是top n的意思，即为返回前面多少条的数据 
-                -g  # 后边可以写一个正则匹配模式，大小写不敏感的
-                 
-                mysqldumpslow -s c -t 20 host-slow.log                # 访问次数最多的20个sql语句
-                mysqldumpslow -s r -t 20 host-slow.log                # 返回记录集最多的20个sql
-                mysqldumpslow -t 10 -s t -g "left join" host-slow.log # 按照时间返回前10条里面含有左连接的sql语句
-                
-                show global status like '%slow%';                     # 查看现在这个session有多少个慢查询
-                show variables like '%slow%';                         # 查看慢查询日志是否开启，如果slow_query_log和log_slow_queries显示为on，说明服务器的慢查询日志已经开启
-                show variables like '%long%';                         # 查看超时阀值
-                desc select * from wei where text='xishizhaohua'\G;   # 扫描整张表 tepe:ALL  没有使用索引 key:NULL
-                create index text_index on wei(text);                 # 创建索引
-
-            }
-        
-        }
-
-        mysql操作次数查询{
-
-            select * from information_schema.global_status;
-
-            com_select
-            com_delete
-            com_insert
-            com_update
-
-        }
-
-    }
 
     mongodb{
 
