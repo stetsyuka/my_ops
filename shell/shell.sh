@@ -87,17 +87,12 @@
         gconf-editor           # 配置编辑器
         /etc/vimrc             # 配置文件路径
         vim +24 file           # 打开文件定位到指定行
-        vim file1 file2        # 打开多个文件    
-        vim -O2 file1 file2    # 垂直分屏
-        vim -on file1 file2    # 水平分屏
         Ctrl+ U                # 向前翻页
         Ctrl+ D                # 向后翻页
         Ctrl+ww                # 在窗口间切换
         Ctrl+w +or-or=         # 增减高度
         :sp filename           # 上下分割打开新文件
         :vs filename           # 左右分割打开新文件
-        :set nu                # 打开行号
-        :set nonu              # 取消行号
         :nohl                  # 取消高亮
         :set paste             # 取消缩进
         :set autoindent        # 设置自动缩进
@@ -105,16 +100,10 @@
         :set binary            # 改为unix格式
         :%s/字符1/字符2/g      # 全部替换
         :200                   # 跳转到200  1 文件头
-        G                      # 跳到行尾
         dd                     # 删除当前行 并复制 可直接p粘贴
-        11111dd                # 删除11111行，可用来清空文件
-        r                      # 替换单个字符
-        R                      # 替换多个字符
         u                      # 撤销上次操作
         *                      # 全文匹配当前光标所在字符串
         $                      # 行尾
-        0                      # 行首
-        X                      # 文档加密
         v =                    # 自动格式化代码
         Ctrl+v                 # 可视模式
         Ctrl+v I ESC           # 多行操作
@@ -124,13 +113,10 @@
 
     归档解压缩{
 
-        tar zxvpf gz.tar.gz -C 放到指定目录 包中的目录       # 解包tar.gz 不指定目录则全解压
         tar zcvpf /$path/gz.tar.gz * # 打包gz 注意*最好用相对路径
         tar zcf /$path/gz.tar.gz *   # 打包正确不提示
         tar ztvpf gz.tar.gz          # 查看gz
-        tar xvf 1.tar -C 目录        # 解包tar
         tar -cvf 1.tar *             # 打包tar
-        tar tvf 1.tar                # 查看tar
         tar -rvf 1.tar 文件名        # 给tar追加文件
         tar --exclude=/home/dmtsai --exclude=*.tar -zcvf myfile.tar.gz /home/* /etc      # 打包/home, /etc ，但排除 /home/dmtsai
         tar -N "2005/06/01" -zcvf home.tar.gz /home      # 在 /home 当中，比 2005/06/01 新的文件才备份
@@ -240,14 +226,6 @@
 
     rpm{
 
-        rpm -ivh lynx          # rpm安装
-        rpm -e lynx            # 卸载包
-        rpm -e lynx --nodeps   # 强制卸载
-        rpm -qa                # 查看所有安装的rpm包
-        rpm -qa | grep lynx    # 查找包是否安装
-        rpm -ql                # 软件包路径
-        rpm -Uvh               # 升级包
-        rpm --test lynx        # 测试
         rpm -qc                # 软件包配置文档
         rpm --import  /etc/pki/rpm-gpg/RPM-GPG-KEY-CentOS-6     # 导入rpm的签名信息
         rpm --initdb           # 初始化rpm 数据库 
@@ -257,12 +235,6 @@
 
     yum{
 
-        yum list                 # 所有软件列表
-        yum install 包名         # 安装包和依赖包
-        yum -y update            # 升级所有包版本,依赖关系，系统版本内核都升级
-        yum -y update 软件包名   # 升级指定的软件包
-        yum -y upgrade           # 不改变软件设置更新软件，系统版本升级，内核不改变
-        yum search mail          # yum搜索相关包
         yum grouplist            # 软件包组
         yum -y groupinstall "Virtualization"   # 安装软件包组
         repoquery -ql gstreamer  # 不安装软件查看包含文件
@@ -299,19 +271,6 @@
 
     }
 
-    编译{
-
-        源码安装{
-
-            ./configure --help                   # 查看所有编译参数
-            ./configure  --prefix=/usr/local/    # 配置参数
-            make                                 # 编译
-            # make -j 8                          # 多线程编译,速度较快,但有些软件不支持
-            make install                         # 安装包
-            make clean                           # 清除编译结果
-
-        }
-
         perl程序编译{
 
             perl Makefile.PL
@@ -345,23 +304,15 @@
 
     wall        　  　          # 给其它用户发消息
     whereis ls                  # 查找命令的目录
-    which                       # 查看当前要执行的命令所在的路径
-    clear                       # 清空整个屏幕
     reset                       # 重新初始化屏幕
-    cal                         # 显示月历
     echo -n 123456 | md5sum     # md5加密
     mkpasswd                    # 随机生成密码   -l位数 -C大小 -c小写 -d数字 -s特殊字符
-    netstat -ntupl | grep port  # 是否打开了某个端口
-    ntpdate cn.pool.ntp.org     # 同步时间, pool.ntp.org: public ntp time server for everyone(http://www.pool.ntp.org/zh/)
     tzselect                    # 选择时区 #+8=(5 9 1 1) # (TZ='Asia/Shanghai'; export TZ)括号内写入 /etc/profile
     /sbin/hwclock -w            # 时间保存到硬件
     /etc/shadow                 # 账户影子文件
     LANG=en                     # 修改语言
     vim /etc/sysconfig/i18n     # 修改编码  LANG="en_US.UTF-8"
     export LC_ALL=C             # 强制字符集
-    vi /etc/hosts               # 查询静态主机名
-    alias                       # 别名
-    watch uptime                # 监测命令动态刷新 监视
     ipcs -a                     # 查看Linux系统当前单个共享内存段的最大值
     ldconfig                    # 动态链接库管理命令
     ldd `which cmd`             # 查看命令的依赖库
@@ -638,14 +589,6 @@
 
     }
 
-    查看剩余内存{
-
-        free -m
-        #-/+ buffers/cache:       6458       1649
-        #6458M为真实使用内存  1649M为真实剩余内存(剩余内存+缓存+缓冲器)
-        #linux会利用所有的剩余内存作为缓存，所以要保证linux运行速度，就需要保证内存的缓存大小
-
-    }
     
     系统信息{
 
@@ -656,11 +599,7 @@
         locale -a             # 列出所有语系
         locale                # 当前环境变量中所有编码
         hwclock               # 查看时间
-        who                   # 当前在线用户
-        w                     # 当前在线用户
-        whoami                # 查看当前用户名
         logname               # 查看初始登陆用户名
-        uptime                # 查看服务器启动时间
         sar -n DEV 1 10       # 查看网卡网速流量
         dmesg                 # 显示开机信息
         lsmod                 # 查看内核模块
@@ -669,7 +608,6 @@
     
     硬件信息{
 
-        more /proc/cpuinfo                                       # 查看cpu信息
         lscpu                                                    # 查看cpu信息
         cat /proc/cpuinfo | grep name | cut -f2 -d: | uniq -c    # 查看cpu型号和逻辑核心数
         getconf LONG_BIT                                         # cpu运行的位数
@@ -694,11 +632,8 @@
     
     终端快捷键{
 
-        Ctrl+A        　    # 行前
-        Ctrl+E        　    # 行尾
         Ctrl+S        　    # 终端锁屏
         Ctrl+Q        　　  # 解锁屏
-        Ctrl+D      　　    # 退出
 
     }
 
@@ -1052,13 +987,7 @@
 
 4 服务{
 
-    /etc/init.d/sendmail start                   # 启动服务  
-    /etc/init.d/sendmail stop                    # 关闭服务
-    /etc/init.d/sendmail status                  # 查看服务当前状态
     /date/mysql/bin/mysqld_safe --user=mysql &   # 启动mysql后台运行
-    vi /etc/rc.d/rc.local                        # 开机启动执行  可用于开机启动脚本
-    /etc/rc.d/rc3.d/S55sshd                      # 开机启动和关机关闭服务连接    # S开机start  K关机stop  55级别 后跟服务名
-    ln -s -f /date/httpd/bin/apachectl /etc/rc.d/rc3.d/S15httpd   # 将启动程序脚本连接到开机启动目录
     ipvsadm -ln                                  # lvs查看后端负载机并发
     ipvsadm -C                                   # lvs清除规则
     xm list                                      # 查看xen虚拟主机列表
@@ -1069,16 +998,6 @@
     "`echo "内容"|iconv -f utf8 -t gbk`" | /bin/mail -s "`echo "标题"|iconv -f utf8 -t gbk`" 收件箱     # 解决邮件乱码
     /usr/local/nagios/bin/nagios -v /usr/local/nagios/etc/nagios.cfg   # 检测nagios配置文件
 
-    chkconfig{
-
-        chkconfig 服务名 on|off|set              # 设置非独立服务启状态
-        chkconfig --level 35   httpd   off       # 让服务不自动启动
-        chkconfig --level 35   httpd   on        # 让服务自动启动 35指的是运行级别
-        chkconfig --list                         # 查看所有服务的启动状态
-        chkconfig --list |grep httpd             # 查看某个服务的启动状态
-        chkconfig –-list [服务名称]              # 查看服务的状态
-
-    }
 
     nginx{
 
