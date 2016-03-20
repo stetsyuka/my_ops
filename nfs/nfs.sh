@@ -2,12 +2,19 @@ NFS搭建
 
 NFS：Network File System
 
-功能也就是能把远程网络的文件挂载到NFS Server上，在Server上看来，客户端的挂载的目录就像自己的子目录一样，可以对它操作。所以，对于嵌入式系统的调试是很方便的。
+功能也就是能把远程网络的文件挂载到NFS Server上，在Server上看来，客户端的挂载的目录就像自己的子目录一样，可以对它操作。
+所以，对于嵌入式系统的调试是很方便的。
 
-NFS支持的功能很多，所以对应的端口号是不固定的，是随机分配的，但都是小于1024。那么客户机是怎么连接到NFS Server上去的呢？这里有一个RPC的东西来支持。
+NFS支持的功能很多，所以对应的端口号是不固定的，是随机分配的，但都是小于1024。那么客户机是怎么连接到NFS Server上去的呢？
+这里有一个RPC的东西来支持。
 RPC：（Remote Procedure Call Protocol）
 
-远程过程调用协议，它是一种通过网络从远程计算机程序上请求服务，而不需要了解底层网络技术的协议。RPC协议假定某些传输协议的存在，如TCP或UDP，为通信程序之间携带信息数据。在OSI网络通信模型中，RPC跨越了传输层和应用层。RPC使得开发包括网络分布式多程序在内的应用程序更加容易。RPC采用客户机/服务器模式。请求程序就是一个客户机，而服务提供程序就是一个服务器。首先，客户机调用进程发送一个有进程参数的调用信息到服务进程，然后等待应答信息。在服务器端，进程保持睡眠状态直到调用信息的到达为止。当一个调用信息到达，服务器获得进程参数，计算结果，发送答复信息，然后等待下一个调用信息，最后，客户端调用进程接收答复信息，获得进程结果，然后调用执行继续进行。
+远程过程调用协议，它是一种通过网络从远程计算机程序上请求服务，而不需要了解底层网络技术的协议。RPC协议假定某些传输协议的
+存在，如TCP或UDP，为通信程序之间携带信息数据。在OSI网络通信模型中，RPC跨越了传输层和应用层。RPC使得开发包括网络分布式多
+程序在内的应用程序更加容易。RPC采用客户机/服务器模式。请求程序就是一个客户机，而服务提供程序就是一个服务器。首先，客户机
+调用进程发送一个有进程参数的调用信息到服务进程，然后等待应答信息。在服务器端，进程保持睡眠状态直到调用信息的到达为止。当
+一个调用信息到达，服务器获得进程参数，计算结果，发送答复信息，然后等待下一个调用信息，最后，客户端调用进程接收答复信息，
+获得进程结果，然后调用执行继续进行。
 RPC在NFS搭建过程钟的功能就是在Server上分配端口号，可以让客户端能从远程连接上Server。RPC固定采用111端口监听。
 
 所以整个NFS实现的过程就是：
@@ -43,22 +50,11 @@ mount -t nfs 10.0.0.3:/tmp  /data/img      # 远程网络挂载
 /etc/exports 权限说明
 
 /tmp         192.168.100.0/24(ro)   localhost(rw)   *.ev.ncku.edu.tw(ro,sync)
-[分享目錄]   [第一部主機(權限)]     [可用主機名]    [可用萬用字元]
-
-rw    ro 	                     # 該目錄分享的權限是可讀寫 (read-write) 或唯讀 (read-only)，但最終能不能讀寫，還是與檔案系統的 rwx及身份有關。
-sync  async 	                 # sync 代表資料會同步寫入到記憶體與硬碟中，async 則代表資料會先暫存於記憶體當中，而非直接寫入硬碟！
-no_root_squash  root_squash 	 # 用戶端使用 NFS 檔案系統的帳號若為 root 時，系統該如何判斷這個帳號的身份？預設的情況下，用戶端 root 的身份會由 root_squash 的設定壓縮成 nfsnobody，如此對伺服器的系統會較有保障。但如果你想要開放用戶端使用 root 身份來操作伺服器的檔案系統，那麼這裡就得要開 no_root_squash 才行！
-all_squash 	                     # 不論登入 NFS 的使用者身份為何， 他的身份都會被壓縮成為匿名使用者，通常也就是 nobody(nfsnobody) 啦！
-anonuid  anongid 	             # anon 意指 anonymous (匿名者) 前面關於 *_squash 提到的匿名使用者的 UID 設定值，通常為 nobody(nfsnobody)，但是你可以自行設定這個 UID 的值！當然，這個 UID 必需要存在於你的 /etc/passwd 當中！anonuid 指的是 UID 而 anongid 則是群組的 GID 囉。
-
 
 /tmp          *(rw,no_root_squash)
 /home/public  192.168.100.0/24(rw)    *(ro)
 /home/test    192.168.100.10(rw)
 /home/linux   *.centos.vbird(rw,all_squash,anonuid=45,anongid=45)
-
-
-
 
 
     # 依赖rpc服务通信 portmap 或 rpcbind
@@ -79,3 +75,5 @@ anonuid  anongid 	             # anon 意指 anonymous (匿名者) 前面關於 
 
     # 服务端的 portmap 或 rpcbind 被停止后，nfs仍然工作正常，但是umout财会提示： not found / mounted or server not reachable  重启服务器的portmap 或 rpcbind 也无济于事。 nfs也要跟着重启，否则nfs工作仍然是不正常的。会造成NFS客户端挂载不正常，df卡住和挂载目录无法访问。需要强制卸载后，重新挂载
     umount -f /data/img/             # 强制卸载挂载目录  如还不可以  umount -l /data/img/
+    
+    mount -o resvport  MAC OS X 无法挂载nfs文件系统解决方法
